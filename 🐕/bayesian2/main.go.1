@@ -1,0 +1,47 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/jbrukh/bayesian"
+)
+
+const (
+	JokeClass     bayesian.Class = "1"
+	NoJokeClass   bayesian.Class = "0"
+)
+
+func main() {
+	// Create a new classifier with the defined classes
+	classifier := bayesian.NewClassifier(JokeClass, NoJokeClass)
+
+	// Training data
+	trainingData := []struct {
+		label   bayesian.Class
+		sentence string
+	}{
+		{JokeClass, "tell me a joke"},
+		{JokeClass, "please tell a joke"},
+		{NoJokeClass, "do not tell me a joke"},
+		{NoJokeClass, "please don't tell a joke"},
+	}
+
+	// Learn the training patterns
+	for _, data := range trainingData {
+		classifier.Learn(strings.Fields(data.sentence), data.label)
+	}
+
+	// Test sentences
+	testSentences := []string{
+		"tell me a joke",
+		"please don't tell a joke",
+	}
+
+	for _, testSentence := range testSentences {
+		words := strings.Fields(testSentence)
+		_, likely, _ := classifier.LogScores(words)
+		fmt.Printf("Most likely class for '%s': %s\n", testSentence, likely)
+	}
+}
+
